@@ -46,116 +46,115 @@ export const constantRoutes = [
   {
     path: '/',
     component: Layout,
-    redirect: '/dashboard',
+    redirect: '/home',
     children: [{
-      path: 'dashboard',
-      name: 'Dashboard',
+      path: 'home',
+      name: 'Home',
       component: () => import('@/views/dashboard/index'),
-      meta: { title: 'Dashboard', icon: 'dashboard' }
+      meta: { title: '首页', icon: 'dashboard' }
     }]
   },
 
   {
-    path: '/example',
-    component: Layout,
-    redirect: '/example/table',
-    name: 'Example',
-    meta: { title: 'Example', icon: 'el-icon-s-help' },
-    children: [
-      {
-        path: 'table',
-        name: 'Table',
-        component: () => import('@/views/table/index'),
-        meta: { title: 'Table', icon: 'table' }
-      },
-      {
-        path: 'tree',
-        name: 'Tree',
-        component: () => import('@/views/tree/index'),
-        meta: { title: 'Tree', icon: 'tree' }
-      }
-    ]
-  },
-
-  {
-    path: '/form',
+    path: '/user',
     component: Layout,
     children: [
       {
         path: 'index',
-        name: 'Form',
-        component: () => import('@/views/form/index'),
-        meta: { title: 'Form', icon: 'form' }
+        name: 'UserManagement',
+        component: () => import('@/views/user/index'),
+        meta: { title: '用户管理', icon: 'el-icon-user' }
       }
     ]
   },
 
   {
-    path: '/nested',
+    path: '/product',
     component: Layout,
-    redirect: '/nested/menu1',
-    name: 'Nested',
-    meta: {
-      title: 'Nested',
-      icon: 'nested'
-    },
     children: [
       {
-        path: 'menu1',
-        component: () => import('@/views/nested/menu1/index'), // Parent router-view
-        name: 'Menu1',
-        meta: { title: 'Menu1' },
-        children: [
-          {
-            path: 'menu1-1',
-            component: () => import('@/views/nested/menu1/menu1-1'),
-            name: 'Menu1-1',
-            meta: { title: 'Menu1-1' }
-          },
-          {
-            path: 'menu1-2',
-            component: () => import('@/views/nested/menu1/menu1-2'),
-            name: 'Menu1-2',
-            meta: { title: 'Menu1-2' },
-            children: [
-              {
-                path: 'menu1-2-1',
-                component: () => import('@/views/nested/menu1/menu1-2/menu1-2-1'),
-                name: 'Menu1-2-1',
-                meta: { title: 'Menu1-2-1' }
-              },
-              {
-                path: 'menu1-2-2',
-                component: () => import('@/views/nested/menu1/menu1-2/menu1-2-2'),
-                name: 'Menu1-2-2',
-                meta: { title: 'Menu1-2-2' }
-              }
-            ]
-          },
-          {
-            path: 'menu1-3',
-            component: () => import('@/views/nested/menu1/menu1-3'),
-            name: 'Menu1-3',
-            meta: { title: 'Menu1-3' }
-          }
-        ]
-      },
-      {
-        path: 'menu2',
-        component: () => import('@/views/nested/menu2/index'),
-        name: 'Menu2',
-        meta: { title: 'menu2' }
+        path: 'index',
+        name: 'ProductManagement',
+        component: () => import('@/views/product/index'),
+        meta: { title: '产品管理', icon: 'el-icon-box' }
       }
     ]
   },
 
   {
-    path: 'external-link',
+    path: '/device',
     component: Layout,
     children: [
       {
-        path: 'https://panjiachen.github.io/vue-element-admin-site/#/',
-        meta: { title: 'External Link', icon: 'link' }
+        path: 'index',
+        name: 'DeviceManagement',
+        component: () => import('@/views/device/index'),
+        meta: { title: '设备管理', icon: 'el-icon-monitor' }
+      }
+    ]
+  },
+
+  {
+    path: '/task',
+    component: Layout,
+    children: [
+      {
+        path: 'index',
+        name: 'TaskManagement',
+        component: () => import('@/views/task/index'),
+        meta: { title: '任务管理', icon: 'el-icon-check' }
+      }
+    ]
+  },
+
+  {
+    path: '/permission',
+    component: Layout,
+    children: [
+      {
+        path: 'index',
+        name: 'PermissionManagement',
+        component: () => import('@/views/permission/index'),
+        meta: { title: '权限管理', icon: 'el-icon-key' }
+      }
+    ]
+  },
+
+  {
+    path: '/alarm',
+    component: Layout,
+    children: [
+      {
+        path: 'index',
+        name: 'AlarmManagement',
+        component: () => import('@/views/alarm/index'),
+        meta: { title: '告警管理', icon: 'el-icon-bell' }
+      }
+    ]
+  },
+
+  {
+    path: '/visualization',
+    component: Layout,
+    children: [
+      {
+        path: 'index',
+        name: 'DataVisualization',
+        component: () => import('@/views/visualization/index'),
+        meta: { title: '数据可视化', icon: 'el-icon-pie-chart' }
+      }
+    ]
+  },
+
+  {
+    path: '/digital-product',
+    component: Layout,
+    children: [
+      {
+        path: 'index',
+        name: 'DigitalProduct',
+        component: () => import('@/views/digital-product/index'),
+        meta: { title: '数字产品', icon: 'el-icon-s-cooperation' }
       }
     ]
   },
