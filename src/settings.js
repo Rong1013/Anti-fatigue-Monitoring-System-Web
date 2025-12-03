@@ -1,6 +1,6 @@
 module.exports = {
 
-  title: 'Vue Admin Template',
+  title: '抗疲劳制造数字化监测系统',
 
   /**
    * @type {boolean} true | false
