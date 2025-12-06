@@ -4,11 +4,13 @@ const { param2Obj } = require('./utils')
 const user = require('./user')
 const table = require('./table')
 const product = require('./product')
+const device = require('./device')
 
 const mocks = [
   ...user,
   ...table,
-  ...product
+  ...product,
+  ...device
 ]
 
 // for front mock
