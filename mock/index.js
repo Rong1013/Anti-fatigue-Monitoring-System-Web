@@ -5,12 +5,14 @@ const user = require('./user')
 const table = require('./table')
 const product = require('./product')
 const device = require('./device')
+const task = require('./task')
 
 const mocks = [
   ...user,
   ...table,
   ...product,
-  ...device
+  ...device,
+  ...task
 ]
 
 // for front mock
