@@ -1,5 +1,7 @@
 <template>
   <div class="visualization-container">
+
+
     <!-- 第一部分：三个饼状图 -->
     <div class="section section-1">
       <h2 class="section-title">资源状态分布</h2>
@@ -104,6 +106,7 @@ export default {
     window.removeEventListener('resize', this.resizeCharts)
   },
   methods: {
+
     async initData() {
       // 获取产品数据
       const productRes = await request({ url: '/vue-admin-template/product/list', method: 'get' })
@@ -449,6 +452,8 @@ export default {
   padding: 20px;
   background-color: #f5f7fa;
 }
+
+
 
 .section {
   margin-bottom: 30px;
