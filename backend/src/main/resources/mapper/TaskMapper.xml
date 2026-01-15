@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.fatigue.monitoring.mapper.TaskMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.fatigue.monitoring.entity.Task">
+        <id column="id" property="id"/>
+        <result column="task_code" property="taskCode"/>
+        <result column="task_name" property="taskName"/>
+        <result column="task_type" property="taskType"/>
+        <result column="task_desc" property="taskDesc"/>
+        <result column="product_id" property="productId"/>
+        <result column="product_code" property="productCode"/>
+        <result column="device_id" property="deviceId"/>
+        <result column="device_code" property="deviceCode"/>
+        <result column="responsible_id" property="responsibleId"/>
+        <result column="responsible_name" property="responsibleName"/>
+        <result column="plan_start_time" property="planStartTime"/>
+        <result column="plan_end_time" property="planEndTime"/>
+        <result column="actual_start_time" property="actualStartTime"/>
+        <result column="actual_end_time" property="actualEndTime"/>
+        <result column="task_status" property="taskStatus"/>
+        <result column="progress" property="progress"/>
+        <result column="deleted" property="deleted"/>
+        <result column="create_by" property="createBy"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_by" property="updateBy"/>
+        <result column="update_time" property="updateTime"/>
+        <result column="remark" property="remark"/>
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, task_code, task_name, task_type, task_desc, product_id, product_code,
+        device_id, device_code, responsible_id, responsible_name, plan_start_time,
+        plan_end_time, actual_start_time, actual_end_time, task_status, progress,
+        deleted, create_by, create_time, update_by, update_time, remark
+    </sql>
+
+    <!-- 分页查询任务列表 -->
+    <select id="selectTaskPage" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM task
+        <where>
+            deleted = 0
+            <if test="task.taskCode != null and task.taskCode != ''">
+                AND task_code LIKE CONCAT('%', #{task.taskCode}, '%')
+            </if>
+            <if test="task.taskName != null and task.taskName != ''">
+                AND task_name LIKE CONCAT('%', #{task.taskName}, '%')
+            </if>
+            <if test="task.taskType != null and task.taskType != ''">
+                AND task_type = #{task.taskType}
+            </if>
+            <if test="task.productCode != null and task.productCode != ''">
+                AND product_code LIKE CONCAT('%', #{task.productCode}, '%')
+            </if>
+            <if test="task.deviceCode != null and task.deviceCode != ''">
+                AND device_code LIKE CONCAT('%', #{task.deviceCode}, '%')
+            </if>
+            <if test="task.taskStatus != null and task.taskStatus != ''">
+                AND task_status = #{task.taskStatus}
+            </if>
+            <if test="task.responsibleName != null and task.responsibleName != ''">
+                AND responsible_name LIKE CONCAT('%', #{task.responsibleName}, '%')
+            </if>
+            <if test="startTime != null and startTime != ''">
+                AND plan_start_time &gt;= #{startTime}
+            </if>
+            <if test="endTime != null and endTime != ''">
+                AND plan_end_time &lt;= #{endTime}
+            </if>
+        </where>
+        ORDER BY create_time DESC
+    </select>
+
+    <!-- 根据任务编号查询任务 -->
+    <select id="selectByTaskCode" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM task
+        WHERE task_code = #{taskCode}
+        AND deleted = 0
+    </select>
+
+</mapper>

@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.fatigue.monitoring.mapper.DeviceMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.fatigue.monitoring.entity.Device">
+        <id column="id" property="id"/>
+        <result column="device_code" property="deviceCode"/>
+        <result column="device_name" property="deviceName"/>
+        <result column="device_type" property="deviceType"/>
+        <result column="device_model" property="deviceModel"/>
+        <result column="manufacturer" property="manufacturer"/>
+        <result column="install_location" property="installLocation"/>
+        <result column="ip_address" property="ipAddress"/>
+        <result column="port" property="port"/>
+        <result column="status" property="status"/>
+        <result column="last_online_time" property="lastOnlineTime"/>
+        <result column="deleted" property="deleted"/>
+        <result column="create_by" property="createBy"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_by" property="updateBy"/>
+        <result column="update_time" property="updateTime"/>
+        <result column="remark" property="remark"/>
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, device_code, device_name, device_type, device_model, manufacturer,
+        install_location, ip_address, port, status, last_online_time, deleted,
+        create_by, create_time, update_by, update_time, remark
+    </sql>
+
+    <!-- 分页查询设备列表 -->
+    <select id="selectDevicePage" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM device
+        <where>
+            deleted = 0
+            <if test="device.deviceCode != null and device.deviceCode != ''">
+                AND device_code LIKE CONCAT('%', #{device.deviceCode}, '%')
+            </if>
+            <if test="device.deviceName != null and device.deviceName != ''">
+                AND device_name LIKE CONCAT('%', #{device.deviceName}, '%')
+            </if>
+            <if test="device.deviceType != null and device.deviceType != ''">
+                AND device_type = #{device.deviceType}
+            </if>
+            <if test="device.status != null">
+                AND status = #{device.status}
+            </if>
+            <if test="device.manufacturer != null and device.manufacturer != ''">
+                AND manufacturer LIKE CONCAT('%', #{device.manufacturer}, '%')
+            </if>
+        </where>
+        ORDER BY create_time DESC
+    </select>
+
+    <!-- 根据设备编号查询设备 -->
+    <select id="selectByDeviceCode" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM device
+        WHERE device_code = #{deviceCode}
+        AND deleted = 0
+    </select>
+
+</mapper>

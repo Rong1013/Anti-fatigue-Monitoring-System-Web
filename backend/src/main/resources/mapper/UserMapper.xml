@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.fatigue.monitoring.mapper.UserMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.fatigue.monitoring.entity.User">
+        <id column="id" property="id"/>
+        <result column="username" property="username"/>
+        <result column="password" property="password"/>
+        <result column="nickname" property="nickname"/>
+        <result column="phone" property="phone"/>
+        <result column="email" property="email"/>
+        <result column="sex" property="sex"/>
+        <result column="avatar" property="avatar"/>
+        <result column="status" property="status"/>
+        <result column="deleted" property="deleted"/>
+        <result column="create_by" property="createBy"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_by" property="updateBy"/>
+        <result column="update_time" property="updateTime"/>
+        <result column="remark" property="remark"/>
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, username, password, nickname, phone, email, sex, avatar, status, deleted,
+        create_by, create_time, update_by, update_time, remark
+    </sql>
+
+    <!-- 根据用户名查询用户 -->
+    <select id="selectByUsername" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM sys_user
+        WHERE username = #{username}
+        AND deleted = 0
+    </select>
+
+    <!-- 根据用户ID查询用户角色列表 -->
+    <select id="selectRoleIdsByUserId" resultType="java.lang.Long">
+        SELECT role_id
+        FROM sys_user_role
+        WHERE user_id = #{userId}
+    </select>
+
+    <!-- 根据用户ID查询用户权限列表 -->
+    <select id="selectPermissionsByUserId" resultType="java.lang.String">
+        SELECT DISTINCT m.perms
+        FROM sys_menu m
+        LEFT JOIN sys_role_menu rm ON m.id = rm.menu_id
+        LEFT JOIN sys_user_role ur ON rm.role_id = ur.role_id
+        WHERE ur.user_id = #{userId}
+        AND m.deleted = 0
+        AND m.perms IS NOT NULL
+        AND m.perms != ''
+    </select>
+
+    <!-- 分页查询用户列表 -->
+    <select id="selectUserPage" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM sys_user
+        <where>
+            deleted = 0
+            <if test="user.username != null and user.username != ''">
+                AND username LIKE CONCAT('%', #{user.username}, '%')
+            </if>
+            <if test="user.nickname != null and user.nickname != ''">
+                AND nickname LIKE CONCAT('%', #{user.nickname}, '%')
+            </if>
+            <if test="user.phone != null and user.phone != ''">
+                AND phone LIKE CONCAT('%', #{user.phone}, '%')
+            </if>
+            <if test="user.status != null">
+                AND status = #{user.status}
+            </if>
+        </where>
+        ORDER BY create_time DESC
+    </select>
+
+</mapper>
