@@ -22,8 +22,12 @@ router.beforeEach(async(to, from, next) => {
 
   if (hasToken) {
     if (to.path === '/login') {
-      // if is logged in, redirect to the home page
-      next({ path: '/' })
+      // if is logged in, redirect to home page
+      next({ path: '/home' })
+      NProgress.done()
+    } else if (to.path === '/') {
+      // if is logged in and accessing root path, redirect to home page
+      next({ path: '/home' })
       NProgress.done()
     } else {
       const hasGetUserInfo = store.getters.name
@@ -50,6 +54,10 @@ router.beforeEach(async(to, from, next) => {
     if (whiteList.indexOf(to.path) !== -1) {
       // in the free login whitelist, go directly
       next()
+    } else if (to.path === '/') {
+      // if no token and accessing root path, redirect to login page
+      next({ path: '/login' })
+      NProgress.done()
     } else {
       // other pages that do not have permission to access are redirected to the login page.
       next(`/login?redirect=${to.path}`)

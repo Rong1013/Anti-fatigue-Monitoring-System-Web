@@ -1,21 +1,16 @@
 <template>
   <div class="digital-product-container">
     <div class="top-bar">
-      <div class="search-container">
-        <el-input
-          v-model="searchParams.productId"
-          placeholder="输入产品ID"
-          class="search-input"
-          prefix-icon="el-icon-search"
-        />
-        <el-input
-          v-model="searchParams.productName"
-          placeholder="输入产品名称"
-          class="search-input"
-          prefix-icon="el-icon-search"
-        />
-        <el-button type="primary" @click="searchProducts" icon="el-icon-search">搜索</el-button>
-        <el-button @click="resetSearch" icon="el-icon-refresh">重置</el-button>
+      <div class="product-selector">
+        <span class="selector-label">选择产品</span>
+        <el-select v-model="selectedProductId" placeholder="请选择产品" @change="handleProductChange" style="width: 300px">
+          <el-option
+            v-for="product in productList"
+            :key="product.id"
+            :label="product.name"
+            :value="product.id"
+          />
+        </el-select>
       </div>
       <el-button type="success" @click="exportDigitalProduct" icon="el-icon-download">导出数字产品</el-button>
     </div>
@@ -153,8 +148,8 @@
                 <el-table-column label="图片" align="center">
                   <template slot-scope="scope">
                     <el-image
-                      :src="scope.row.image1.url"
-                      :preview-src-list="hardnessData.images.map(item => item.url)"
+                      :src="scope.row.image1.src"
+                      :preview-src-list="hardnessData.images.map(item => item.src)"
                       class="table-image"
                       fit="cover"
                     >
@@ -173,8 +168,8 @@
                   <template slot-scope="scope">
                     <el-image
                       v-if="scope.row.image2"
-                      :src="scope.row.image2.url"
-                      :preview-src-list="hardnessData.images.map(item => item.url)"
+                      :src="scope.row.image2.src"
+                      :preview-src-list="hardnessData.images.map(item => item.src)"
                       class="table-image"
                       fit="cover"
                     >
@@ -193,7 +188,7 @@
             <h4 class="section-subtitle">加工视频</h4>
             <div class="video-container">
               <video width="100%" height="360" controls>
-                <source :src="hardnessData.video.url" type="video/mp4">
+                <source :src="hardnessData.video.src" type="video/mp4">
                 您的浏览器不支持视频播放。
               </video>
               <div class="video-name">{{ hardnessData.video.name }}</div>
@@ -295,8 +290,8 @@
                 <el-table-column label="图片" align="center">
                   <template slot-scope="scope">
                     <el-image
-                      :src="scope.row.image1.url"
-                      :preview-src-list="morphologyData.images.map(item => item.url)"
+                      :src="scope.row.image1.src"
+                      :preview-src-list="morphologyData.images.map(item => item.src)"
                       class="table-image"
                       fit="cover"
                     >
@@ -315,8 +310,8 @@
                   <template slot-scope="scope">
                     <el-image
                       v-if="scope.row.image2"
-                      :src="scope.row.image2.url"
-                      :preview-src-list="morphologyData.images.map(item => item.url)"
+                      :src="scope.row.image2.src"
+                      :preview-src-list="morphologyData.images.map(item => item.src)"
                       class="table-image"
                       fit="cover"
                     >
@@ -335,7 +330,7 @@
             <h4 class="section-subtitle">加工视频</h4>
             <div class="video-container">
               <video width="100%" height="360" controls>
-                <source :src="morphologyData.video.url" type="video/mp4">
+                <source :src="morphologyData.video.src" type="video/mp4">
                 您的浏览器不支持视频播放。
               </video>
               <div class="video-name">{{ morphologyData.video.name }}</div>
@@ -481,6 +476,156 @@
           </div>
         </div>
       </div>
+
+      <!-- 通用工艺数据展示区域（用于其他产品） -->
+      <div v-if="currentNode !== 'hardness' && currentNode !== 'morphology' && currentNode !== 'stress'" class="node-data">
+        <div class="section-card">
+          <h3 class="section-title">{{ currentNode }}数据</h3>
+          
+          <div v-if="getCurrentNodeStatus() === '已完成' || getCurrentNodeStatus() === '进行中'">
+            <!-- 加工信息 -->
+            <div class="data-section">
+              <h4 class="section-subtitle">加工信息</h4>
+              <div class="info-grid">
+                <div class="info-item">
+                  <span class="info-label">设备</span>
+                  <span class="info-value">{{ hardnessData.techInfo.device }}</span>
+                </div>
+                <div class="info-item">
+                  <span class="info-label">加工方法</span>
+                  <span class="info-value">{{ hardnessData.techInfo.method }}</span>
+                </div>
+                <div class="info-item">
+                  <span class="info-label">操作人员</span>
+                  <span class="info-value">{{ hardnessData.techInfo.operator }}</span>
+                </div>
+                <div class="info-item">
+                  <span class="info-label">工艺流程</span>
+                  <span class="info-value">{{ hardnessData.techInfo.processFlow }}</span>
+                </div>
+                <div class="info-item">
+                  <span class="info-label">加工地点</span>
+                  <span class="info-value">{{ hardnessData.techInfo.location }}</span>
+                </div>
+                <div class="info-item">
+                  <span class="info-label">加工式样</span>
+                  <span class="info-value">{{ hardnessData.techInfo.sample }}</span>
+                </div>
+                <div class="info-item">
+                  <span class="info-label">开始时间</span>
+                  <span class="info-value">{{ hardnessData.techInfo.startTime }}</span>
+                </div>
+                <div class="info-item">
+                  <span class="info-label">结束时间</span>
+                  <span class="info-value">{{ hardnessData.techInfo.endTime }}</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- 工艺参数 -->
+            <div class="data-section">
+              <h4 class="section-subtitle">工艺参数</h4>
+              <div class="info-grid">
+                <div class="info-item" v-for="(param, index) in hardnessData.processParams" :key="index">
+                  <span class="info-label">{{ param.paramName }}（{{ param.unit }}）：</span>
+                  <span class="info-value">{{ param.paramValue }}</span>
+                  <span v-if="param.standard" class="info-standard">（标准：{{ param.standard }}）</span>
+                  <span class="info-status" :class="param.status">{{ param.status }}</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- 环境参数 -->
+            <div class="data-section">
+              <h4 class="section-subtitle">环境参数</h4>
+              <div class="info-grid">
+                <div class="info-item">
+                  <span class="info-label">温度</span>
+                  <span class="info-value">{{ hardnessData.envInfo.temperature }} °C</span>
+                </div>
+                <div class="info-item">
+                  <span class="info-label">湿度</span>
+                  <span class="info-value">{{ hardnessData.envInfo.humidity }}%</span>
+                </div>
+                <div class="info-item">
+                  <span class="info-label">气压</span>
+                  <span class="info-value">{{ hardnessData.envInfo.pressure }} kPa</span>
+                </div>
+                <div class="info-item">
+                  <span class="info-label">光照</span>
+                  <span class="info-value">{{ hardnessData.envInfo.illumination }}</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- 实验图片 -->
+            <div class="data-section">
+              <h4 class="section-subtitle">实验图片</h4>
+              <div class="image-table-container">
+                <el-table :data="formattedImages" stripe style="width: 100%">
+                  <el-table-column label="图片名称" width="200">
+                    <template slot-scope="scope">
+                      {{ scope.row.image1 ? scope.row.image1.name.replace(/\.png$/, '') : '' }}
+                    </template>
+                  </el-table-column>
+                  <el-table-column label="图片" align="center">
+                    <template slot-scope="scope">
+                      <el-image
+                        v-if="scope.row.image1"
+                        :src="scope.row.image1.src"
+                        :preview-src-list="hardnessData.images.map(item => item.src)"
+                        class="table-image"
+                        fit="cover"
+                      >
+                        <div slot="error" class="image-slot">
+                          <i class="el-icon-picture-outline"></i>
+                        </div>
+                      </el-image>
+                    </template>
+                  </el-table-column>
+                  <el-table-column label="图片名称" width="200">
+                    <template slot-scope="scope">
+                      {{ scope.row.image2 ? scope.row.image2.name.replace(/\.png$/, '') : '' }}
+                    </template>
+                  </el-table-column>
+                  <el-table-column label="图片" align="center">
+                    <template slot-scope="scope">
+                      <el-image
+                        v-if="scope.row.image2"
+                        :src="scope.row.image2.src"
+                        :preview-src-list="hardnessData.images.map(item => item.src)"
+                        class="table-image"
+                        fit="cover"
+                      >
+                        <div slot="error" class="image-slot">
+                          <i class="el-icon-picture-outline"></i>
+                        </div>
+                      </el-image>
+                    </template>
+                  </el-table-column>
+                </el-table>
+              </div>
+            </div>
+
+            <!-- 加工视频 -->
+            <div class="data-section">
+              <h4 class="section-subtitle">加工视频</h4>
+              <div class="video-container">
+                <video width="100%" height="360" controls>
+                  <source :src="hardnessData.video.src" type="video/mp4">
+                  您的浏览器不支持视频播放。
+                </video>
+                <div class="video-name">{{ hardnessData.video.name }}</div>
+              </div>
+            </div>
+          </div>
+
+          <div v-else class="no-data-container">
+            <i class="el-icon-warning-outline no-data-icon"></i>
+            <div class="no-data-text">暂无数据</div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -496,15 +641,22 @@ export default {
   name: 'DigitalProduct',
   data() {
     return {
-      // 搜索参数
-      searchParams: {
-        productId: '',
-        productName: ''
-      },
+      // 产品选择
+      selectedProductId: '',
+      productList: [
+        { id: '123456ABCD12345678901234567890XY', name: '齿轮测试', status: '已完成', manager: '姜钦露' },
+        { id: '9876543210ZYXWVUTSRQPONMLKJIHGFED', name: '轴承检测', status: '进行中', manager: '金荣' },
+        { id: 'FEDCBA98765432101234567890ABCDEF', name: '轴套加工', status: '未激活', manager: '姜钦露' },
+        { id: 'ABCDEF0123456789FEDCBA9876543210', name: '齿轮箱组装', status: '已完成', manager: '金荣' },
+        { id: '1A2B3C4D5E6F7890A1B2C3D4E5F6789', name: '传动轴校验', status: '进行中', manager: '姜钦露' },
+        { id: '9876FEDC5432BA109876FEDC5432BA10', name: '离合器测试', status: '未激活', manager: '金荣' },
+        { id: 'A1B2C3D4E5F678901234567890ABCDEF', name: '变速箱调试', status: '已完成', manager: '姜钦露' },
+        { id: 'FEDCBA0987654321FEDCBA0987654321', name: '发动机检测', status: '进行中', manager: '金荣' }
+      ],
       
       // 产品信息
       productData: {
-        id: '123456ABCD12345678901234567890XY', // 32位混合编码
+        id: '123456ABCD12345678901234567890XY',
         name: '齿轮测试'
       },
       
@@ -566,16 +718,16 @@ export default {
           illumination: '500 lux'
         },
         images: [
-          { url: require('@/assets/DigitalProduct Data/硬度计/加工图片/仪表盘图片.png'), name: '仪表盘图片.png' },
-          { url: require('@/assets/DigitalProduct Data/硬度计/加工图片/左节圆图片.png'), name: '左节圆图片.png' },
-          { url: require('@/assets/DigitalProduct Data/硬度计/加工图片/测试前式样图片.png'), name: '测试前式样图片.png' },
-          { url: require('@/assets/DigitalProduct Data/硬度计/加工图片/测试前式样表面图片.png'), name: '测试前式样表面图片.png' },
-          { url: require('@/assets/DigitalProduct Data/硬度计/加工图片/配重刻度图片.png'), name: '配重刻度图片.png' },
-          { url: require('@/assets/DigitalProduct Data/硬度计/加工图片/齿顶圆测试面图片.png'), name: '齿顶圆测试面图片.png' }
+          { src: require('@/assets/DigitalProduct Data/硬度计/加工图片/仪表盘图片.png'), name: '仪表盘图片.png' },
+          { src: require('@/assets/DigitalProduct Data/硬度计/加工图片/左节圆图片.png'), name: '左节圆图片.png' },
+          { src: require('@/assets/DigitalProduct Data/硬度计/加工图片/测试前式样图片.png'), name: '测试前式样图片.png' },
+          { src: require('@/assets/DigitalProduct Data/硬度计/加工图片/测试前式样表面图片.png'), name: '测试前式样表面图片.png' },
+          { src: require('@/assets/DigitalProduct Data/硬度计/加工图片/配重刻度图片.png'), name: '配重刻度图片.png' },
+          { src: require('@/assets/DigitalProduct Data/硬度计/加工图片/齿顶圆测试面图片.png'), name: '齿顶圆测试面图片.png' }
         ],
         // 合并齿轮功能测试的视频
         video: {
-          url: require('@/assets/DigitalProduct Data/硬度计/加工过程视频.mp4'),
+          src: require('@/assets/DigitalProduct Data/硬度计/加工过程视频.mp4'),
           name: '加工过程视频'
         }
       },
@@ -605,14 +757,14 @@ export default {
           illumination: '500 lux'
         },
         images: [
-          { url: require('@/assets/DigitalProduct Data/三维型貌仪/加工图片/拼接尺寸.png'), name: '拼接尺寸.png' },
-          { url: require('@/assets/DigitalProduct Data/三维型貌仪/加工图片/测试后云图.png'), name: '测试后云图.png' },
-          { url: require('@/assets/DigitalProduct Data/三维型貌仪/加工图片/测量参数.png'), name: '测量参数.png' },
-          { url: require('@/assets/DigitalProduct Data/三维型貌仪/加工图片/目镜与物镜参数.png'), name: '目镜与物镜参数.png' },
-          { url: require('@/assets/DigitalProduct Data/三维型貌仪/加工图片/表面干涉纹.png'), name: '表面干涉纹.png' }
+          { src: require('@/assets/DigitalProduct Data/三维型貌仪/加工图片/拼接尺寸.png'), name: '拼接尺寸.png' },
+          { src: require('@/assets/DigitalProduct Data/三维型貌仪/加工图片/测试后云图.png'), name: '测试后云图.png' },
+          { src: require('@/assets/DigitalProduct Data/三维型貌仪/加工图片/测量参数.png'), name: '测量参数.png' },
+          { src: require('@/assets/DigitalProduct Data/三维型貌仪/加工图片/目镜与物镜参数.png'), name: '目镜与物镜参数.png' },
+          { src: require('@/assets/DigitalProduct Data/三维型貌仪/加工图片/表面干涉纹.png'), name: '表面干涉纹.png' }
         ],
         video: {
-          url: require('@/assets/DigitalProduct Data/三维型貌仪/三维形貌测量过程视频.mp4'),
+          src: require('@/assets/DigitalProduct Data/三维型貌仪/三维形貌测量过程视频.mp4'),
           name: '三维形貌测量过程视频'
         }
       },
@@ -702,24 +854,585 @@ export default {
   },
   
   methods: {
-    // 搜索产品
-    searchProducts() {
-      this.$message({
-        message: '搜索功能已触发，产品ID：' + this.searchParams.productId + '，产品名称：' + this.searchParams.productName,
-        type: 'info'
-      })
+    // 处理产品切换
+    handleProductChange(productId) {
+      const selectedProduct = this.productList.find(p => p.id === productId)
+      if (selectedProduct) {
+        this.productData.id = selectedProduct.id
+        this.productData.name = selectedProduct.name
+        this.updateProcessNodes(selectedProduct)
+        this.generateQrCode()
+        this.$message({
+          message: '已切换到产品：' + selectedProduct.name,
+          type: 'success'
+        })
+      }
     },
     
-    // 重置搜索
-    resetSearch() {
-      this.searchParams = {
-        productId: '',
-        productName: ''
+    // 更新流程节点
+    updateProcessNodes(product) {
+      if (product.name === '齿轮测试') {
+        this.processNodes = [
+          { id: 'hardness', title: '硬度测试', status: '已完成', icon: 'el-icon-medal-1' },
+          { id: 'morphology', title: '三维形貌测试', status: '已完成', icon: 'el-icon-picture-outline-round' },
+          { id: 'stress', title: '残余应力测试', status: '已完成', icon: 'el-icon-data-analysis' }
+        ]
+      } else {
+        const processCategories = [
+          {
+            name: '粗加工',
+            processes: ['车削', '铣削', '刨削', '钻削', '镗削', '锯削', '拉削', '磨削'],
+            icon: 'el-icon-cpu'
+          },
+          {
+            name: '精加工',
+            processes: ['精车', '精铣', '精磨', '研磨', '珩磨', '抛光', '超精加工'],
+            icon: 'el-icon-edit-outline'
+          },
+          {
+            name: '表面强化',
+            processes: ['淬火', '回火', '正火', '退火', '渗碳', '渗氮', '表面淬火', '激光强化'],
+            icon: 'el-icon-magic-stick'
+          },
+          {
+            name: '表面光整与检测',
+            processes: ['喷砂', '喷丸', '电镀', '阳极氧化', '化学镀', '超声波检测', '磁粉检测', '渗透检测'],
+            icon: 'el-icon-brush'
+          }
+        ]
+        
+        const iconMap = {
+          '车削': 'el-icon-cpu',
+          '铣削': 'el-icon-cpu',
+          '刨削': 'el-icon-cpu',
+          '钻削': 'el-icon-cpu',
+          '镗削': 'el-icon-cpu',
+          '锯削': 'el-icon-cpu',
+          '拉削': 'el-icon-cpu',
+          '磨削': 'el-icon-cpu',
+          '精车': 'el-icon-edit-outline',
+          '精铣': 'el-icon-edit-outline',
+          '精磨': 'el-icon-edit-outline',
+          '研磨': 'el-icon-edit-outline',
+          '珩磨': 'el-icon-edit-outline',
+          '抛光': 'el-icon-edit-outline',
+          '超精加工': 'el-icon-edit-outline',
+          '淬火': 'el-icon-magic-stick',
+          '回火': 'el-icon-magic-stick',
+          '正火': 'el-icon-magic-stick',
+          '退火': 'el-icon-magic-stick',
+          '渗碳': 'el-icon-magic-stick',
+          '渗氮': 'el-icon-magic-stick',
+          '表面淬火': 'el-icon-magic-stick',
+          '激光强化': 'el-icon-magic-stick',
+          '喷砂': 'el-icon-brush',
+          '喷丸': 'el-icon-brush',
+          '电镀': 'el-icon-brush',
+          '阳极氧化': 'el-icon-brush',
+          '化学镀': 'el-icon-brush',
+          '超声波检测': 'el-icon-brush',
+          '磁粉检测': 'el-icon-brush',
+          '渗透检测': 'el-icon-brush'
+        }
+        
+        const allProcesses = []
+        processCategories.forEach(category => {
+          allProcesses.push(...category.processes)
+        })
+        
+        const processCount = Math.floor(Math.random() * 5) + 3
+        const shuffledProcesses = [...allProcesses].sort(() => Math.random() - 0.5)
+        const selectedProcesses = shuffledProcesses.slice(0, processCount)
+        
+        this.processNodes = selectedProcesses.map((process, index) => {
+          let status = '未开始'
+          if (product.status === '已完成') {
+            status = '已完成'
+          } else if (product.status === '进行中' && index === 0) {
+            status = '进行中'
+          }
+          return {
+            id: process,
+            title: process,
+            status: status,
+            icon: iconMap[process] || 'el-icon-setting'
+          }
+        })
       }
-      this.$message({
-        message: '搜索条件已重置',
-        type: 'success'
-      })
+      
+      this.currentNode = this.processNodes[0].id
+      this.generateNodeData(this.currentNode)
+    },
+    
+    // 生成节点数据
+    generateNodeData(nodeId) {
+      const product = this.productList.find(p => p.id === this.selectedProductId)
+      if (!product) return
+      
+      if (product.name === '齿轮测试') {
+        switch (nodeId) {
+          case 'hardness':
+            this.hardnessData = this.generateHardnessData(product)
+            break
+          case 'morphology':
+            this.morphologyData = this.generateMorphologyData(product)
+            break
+          case 'stress':
+            this.stressData = this.generateStressData(product)
+            break
+        }
+      } else {
+        const processCategories = [
+          {
+            name: '粗加工',
+            processes: ['车削', '铣削', '刨削', '钻削', '镗削', '锯削', '拉削', '磨削'],
+            device: '数控加工中心DMG-100',
+            method: '数控加工',
+            standard: 'GB/T 1800.1-2009',
+            location: '粗加工车间101'
+          },
+          {
+            name: '精加工',
+            processes: ['精车', '精铣', '精磨', '研磨', '珩磨', '抛光', '超精加工'],
+            device: '精密加工中心Mazak-200',
+            method: '精密加工',
+            standard: 'GB/T 1800.2-2009',
+            location: '精加工车间102'
+          },
+          {
+            name: '表面强化',
+            processes: ['淬火', '回火', '正火', '退火', '渗碳', '渗氮', '表面淬火', '激光强化'],
+            device: '热处理炉HT-500',
+            method: '热处理',
+            standard: 'GB/T 16924-2008',
+            location: '热处理车间103'
+          },
+          {
+            name: '表面光整与检测',
+            processes: ['喷砂', '喷丸', '电镀', '阳极氧化', '化学镀', '超声波检测', '磁粉检测', '渗透检测'],
+            device: '表面处理设备SP-300',
+            method: '表面处理',
+            standard: 'GB/T 9799-2011',
+            location: '表面处理车间104'
+          }
+        ]
+        
+        let category = null
+        processCategories.forEach(cat => {
+          if (cat.processes.includes(nodeId)) {
+            category = cat
+          }
+        })
+        
+        if (category) {
+          this.generateProcessData(product, nodeId, category)
+        }
+      }
+    },
+    
+    // 生成硬度测试数据
+    generateHardnessData(product) {
+      const baseValue = Math.floor(Math.random() * 20) + 50
+      const operator = product.name === '齿轮测试' ? '姜钦露' : product.manager
+      return {
+        processParams: [
+          { paramName: '硬度值', paramValue: String(baseValue), unit: 'HRC', standard: '55-62', status: baseValue >= 55 && baseValue <= 62 ? '正常' : '异常' },
+          { paramName: '测试力', paramValue: '150', unit: 'kgf', standard: '150', status: '正常' },
+          { paramName: '测试时间', paramValue: String(Math.floor(Math.random() * 10) + 10), unit: 's', standard: '10-20', status: '正常' },
+          { paramName: '压痕直径', paramValue: (Math.random() * 1 + 2).toFixed(1), unit: 'mm', standard: '2.0-3.0', status: '正常' },
+          { paramName: '实验负荷', paramValue: '0.5', unit: 'KN', standard: '', status: '正常' },
+          { paramName: '测点深度', paramValue: String(Math.floor(Math.random() * 100) + 150), unit: 'μm', standard: '', status: '正常' },
+          { paramName: '压痕深度', paramValue: (Math.random() * 200 + 700).toFixed(2), unit: 'μm', standard: '', status: '正常' }
+        ],
+        techInfo: {
+          device: '洛氏硬度计HR-150A',
+          method: '洛氏硬度测试法',
+          standard: 'GB/T 230.1-2018',
+          operator: operator,
+          testTime: this.generateRandomDate(),
+          processFlow: '硬度测试',
+          location: '硬度测试室301',
+          sample: product.name,
+          startTime: this.generateRandomDate(),
+          endTime: this.generateRandomDate()
+        },
+        envInfo: {
+          temperature: Math.floor(Math.random() * 10) + 20,
+          humidity: Math.floor(Math.random() * 20) + 35,
+          pressure: (Math.random() * 5 + 98).toFixed(1),
+          illumination: '500 lux'
+        },
+        images: [
+          { src: require('@/assets/DigitalProduct Data/硬度计/加工图片/仪表盘图片.png'), name: '仪表盘图片.png' },
+          { src: require('@/assets/DigitalProduct Data/硬度计/加工图片/左节圆图片.png'), name: '左节圆图片.png' },
+          { src: require('@/assets/DigitalProduct Data/硬度计/加工图片/测试前式样图片.png'), name: '测试前式样图片.png' },
+          { src: require('@/assets/DigitalProduct Data/硬度计/加工图片/测试前式样表面图片.png'), name: '测试前式样表面图片.png' },
+          { src: require('@/assets/DigitalProduct Data/硬度计/加工图片/配重刻度图片.png'), name: '配重刻度图片.png' },
+          { src: require('@/assets/DigitalProduct Data/硬度计/加工图片/齿顶圆测试面图片.png'), name: '齿顶圆测试面图片.png' }
+        ],
+        video: {
+          src: require('@/assets/DigitalProduct Data/硬度计/加工过程视频.mp4'),
+          name: '加工过程视频'
+        }
+      }
+    },
+    
+    // 生成三维形貌测试数据
+    generateMorphologyData(product) {
+      const roughness = (Math.random() * 0.5 + 0.5).toFixed(2)
+      const operator = product.name === '齿轮测试' ? '姜钦露' : product.manager
+      return {
+        processParams: [
+          { paramName: '表面粗糙度', paramValue: roughness, unit: 'μm', standard: '≤1.0', status: parseFloat(roughness) <= 1.0 ? '正常' : '异常' },
+          { paramName: '轮廓算术平均偏差', paramValue: (parseFloat(roughness) - 0.05).toFixed(2), unit: 'μm', standard: '≤0.8', status: parseFloat(roughness) - 0.05 <= 0.8 ? '正常' : '异常' },
+          { paramName: '最大轮廓高度', paramValue: (Math.random() * 2 + 4).toFixed(1), unit: 'μm', standard: '≤6.0', status: '正常' },
+          { paramName: '扫描速度', paramValue: String(Math.floor(Math.random() * 2) + 1), unit: 'mm/s', standard: '1-3', status: '正常' }
+        ],
+        techInfo: {
+          device: '三维形貌仪ContourGT-X8',
+          precision: '0.01 μm',
+          scope: '10mm×10mm',
+          operator: operator,
+          startTime: this.generateRandomDate(),
+          endTime: this.generateRandomDate(),
+          location: '形貌测试室302',
+          sample: product.name,
+          method: '白光干涉法',
+          standard: 'GB/T 3505-2009'
+        },
+        envInfo: {
+          temperature: Math.floor(Math.random() * 10) + 20,
+          humidity: Math.floor(Math.random() * 20) + 35,
+          pressure: (Math.random() * 5 + 98).toFixed(1),
+          illumination: '600 lux'
+        },
+        images: [
+          { src: require('@/assets/DigitalProduct Data/三维型貌仪/加工图片/拼接尺寸.png'), name: '拼接尺寸.png' },
+          { src: require('@/assets/DigitalProduct Data/三维型貌仪/加工图片/测试后云图.png'), name: '测试后云图.png' },
+          { src: require('@/assets/DigitalProduct Data/三维型貌仪/加工图片/测量参数.png'), name: '测量参数.png' },
+          { src: require('@/assets/DigitalProduct Data/三维型貌仪/加工图片/目镜与物镜参数.png'), name: '目镜与物镜参数.png' },
+          { src: require('@/assets/DigitalProduct Data/三维型貌仪/加工图片/表面干涉纹.png'), name: '表面干涉纹.png' }
+        ],
+        video: {
+          src: require('@/assets/DigitalProduct Data/三维型貌仪/三维形貌测量过程视频.mp4'),
+          name: '加工过程视频'
+        }
+      }
+    },
+    
+    // 生成残余应力测试数据
+    generateStressData(product) {
+      const stressValue = (Math.random() * 400 - 200).toFixed(1)
+      const operator = product.name === '齿轮测试' ? '姜钦露' : product.manager
+      return {
+        processParams: [
+          { paramName: '残余应力值', paramValue: stressValue, unit: 'MPa', standard: '-150~150', status: parseFloat(stressValue) >= -150 && parseFloat(stressValue) <= 150 ? '正常' : '异常' },
+          { paramName: '测量深度', paramValue: String(Math.floor(Math.random() * 50) + 10), unit: 'μm', standard: '10-60', status: '正常' },
+          { paramName: '衍射角', paramValue: (Math.random() * 10 + 140).toFixed(2), unit: '°', standard: '140-150', status: '正常' },
+          { paramName: '测量点数', paramValue: String(Math.floor(Math.random() * 5) + 5), unit: '个', standard: '5-10', status: '正常' }
+        ],
+        techInfo: {
+          device: 'X射线应力分析仪X-350A',
+          method: 'X射线衍射法',
+          standard: 'GB/T 7704-2017',
+          operator: operator,
+          startTime: this.generateRandomDate(),
+          endTime: this.generateRandomDate(),
+          location: '应力测试室303',
+          sample: product.name,
+          crystalPlane: '(211)',
+          wavelength: '2.291 Å'
+        },
+        envInfo: {
+          temperature: Math.floor(Math.random() * 10) + 20,
+          humidity: Math.floor(Math.random() * 20) + 35,
+          pressure: (Math.random() * 5 + 98).toFixed(1),
+          illumination: '550 lux'
+        },
+        images: [
+          { src: require('@/assets/DigitalProduct Data/残余应力/加工图片/残余应力数据图像.png'), name: '残余应力数据图像.png' },
+          { src: require('@/assets/DigitalProduct Data/残余应力/加工图片/背底片.png'), name: '背底片.png' },
+          { src: require('@/assets/DigitalProduct Data/残余应力/加工图片/轮廓线与背底线.png'), name: '轮廓线与背底线.png' },
+          { src: require('@/assets/DigitalProduct Data/残余应力/加工图片/靶探头.png'), name: '靶探头.png' }
+        ],
+        video: {
+          src: require('@/assets/DigitalProduct Data/残余应力/三维形貌测量过程视频.mp4'),
+          name: '加工过程视频'
+        }
+      }
+    },
+    
+    // 生成尺寸检测数据
+    generateDimensionData(product) {
+      const outerDiameter = (Math.random() * 10 + 90).toFixed(2)
+      const innerDiameter = (Math.random() * 5 + 40).toFixed(2)
+      const length = (Math.random() * 20 + 80).toFixed(2)
+      const operator = product.name === '齿轮测试' ? '姜钦露' : product.manager
+      return {
+        processParams: [
+          { paramName: '外径', paramValue: outerDiameter, unit: 'mm', standard: '90-100', status: parseFloat(outerDiameter) >= 90 && parseFloat(outerDiameter) <= 100 ? '正常' : '异常' },
+          { paramName: '内径', paramValue: innerDiameter, unit: 'mm', standard: '40-45', status: parseFloat(innerDiameter) >= 40 && parseFloat(innerDiameter) <= 45 ? '正常' : '异常' },
+          { paramName: '长度', paramValue: length, unit: 'mm', standard: '80-100', status: parseFloat(length) >= 80 && parseFloat(length) <= 100 ? '正常' : '异常' },
+          { paramName: '圆度', paramValue: (Math.random() * 0.02 + 0.01).toFixed(3), unit: 'mm', standard: '≤0.03', status: '正常' },
+          { paramName: '圆柱度', paramValue: (Math.random() * 0.03 + 0.01).toFixed(3), unit: 'mm', standard: '≤0.04', status: '正常' },
+          { paramName: '同轴度', paramValue: (Math.random() * 0.02 + 0.01).toFixed(3), unit: 'mm', standard: '≤0.03', status: '正常' }
+        ],
+        techInfo: {
+          device: '三坐标测量机CMM-2000',
+          precision: '0.001 mm',
+          range: '2000×2000×1000 mm',
+          operator: operator,
+          startTime: this.generateRandomDate(),
+          endTime: this.generateRandomDate(),
+          location: '尺寸检测室304',
+          sample: product.name,
+          method: '接触式测量',
+          standard: 'GB/T 1958-2017'
+        },
+        envInfo: {
+          temperature: Math.floor(Math.random() * 2) + 20,
+          humidity: Math.floor(Math.random() * 10) + 40,
+          pressure: (Math.random() * 2 + 100).toFixed(1),
+          illumination: '700 lux'
+        },
+        images: [
+          { src: require('@/assets/DigitalProduct Data/硬度计/加工图片/仪表盘图片.png'), name: '尺寸测量图片1.png' },
+          { src: require('@/assets/DigitalProduct Data/硬度计/加工图片/左节圆图片.png'), name: '尺寸测量图片2.png' },
+          { src: require('@/assets/DigitalProduct Data/硬度计/加工图片/测试前式样图片.png'), name: '尺寸测量图片3.png' }
+        ],
+        video: {
+          src: require('@/assets/DigitalProduct Data/硬度计/加工过程视频.mp4'),
+          name: '尺寸测量视频'
+        }
+      }
+    },
+    
+    // 生成表面质量数据
+    generateSurfaceData(product) {
+      const surfaceRoughness = (Math.random() * 0.8 + 0.2).toFixed(2)
+      const operator = product.name === '齿轮测试' ? '姜钦露' : product.manager
+      return {
+        processParams: [
+          { paramName: '表面粗糙度Ra', paramValue: surfaceRoughness, unit: 'μm', standard: '≤1.0', status: parseFloat(surfaceRoughness) <= 1.0 ? '正常' : '异常' },
+          { paramName: '表面粗糙度Rz', paramValue: (parseFloat(surfaceRoughness) * 4).toFixed(2), unit: 'μm', standard: '≤4.0', status: '正常' },
+          { paramName: '波纹度', paramValue: (Math.random() * 5 + 1).toFixed(2), unit: 'μm', standard: '≤6.0', status: '正常' },
+          { paramName: '表面缺陷', paramValue: '0', unit: '个', standard: '0', status: '正常' },
+          { paramName: '划痕深度', paramValue: (Math.random() * 2).toFixed(2), unit: 'μm', standard: '≤2.0', status: '正常' },
+          { paramName: '氧化层厚度', paramValue: (Math.random() * 5 + 1).toFixed(2), unit: 'μm', standard: '≤6.0', status: '正常' }
+        ],
+        techInfo: {
+          device: '表面粗糙度仪SJ-410',
+          precision: '0.001 μm',
+          range: '0-350 μm',
+          operator: operator,
+          startTime: this.generateRandomDate(),
+          endTime: this.generateRandomDate(),
+          location: '表面检测室305',
+          sample: product.name,
+          method: '触针法',
+          standard: 'GB/T 3505-2009'
+        },
+        envInfo: {
+          temperature: Math.floor(Math.random() * 10) + 20,
+          humidity: Math.floor(Math.random() * 20) + 35,
+          pressure: (Math.random() * 5 + 98).toFixed(1),
+          illumination: '650 lux'
+        },
+        images: [
+          { src: require('@/assets/DigitalProduct Data/三维型貌仪/加工图片/拼接尺寸.png'), name: '表面质量图片1.png' },
+          { src: require('@/assets/DigitalProduct Data/三维型貌仪/加工图片/测试后云图.png'), name: '表面质量图片2.png' }
+        ],
+        video: {
+          src: require('@/assets/DigitalProduct Data/三维型貌仪/三维形貌测量过程视频.mp4'),
+          name: '表面质量视频'
+        }
+      }
+    },
+    
+    // 生成功能测试数据
+    generateFunctionData(product) {
+      const torque = (Math.random() * 100 + 200).toFixed(1)
+      const speed = (Math.random() * 500 + 1000).toFixed(0)
+      const operator = product.name === '齿轮测试' ? '姜钦露' : product.manager
+      return {
+        processParams: [
+          { paramName: '扭矩', paramValue: torque, unit: 'N·m', standard: '200-300', status: parseFloat(torque) >= 200 && parseFloat(torque) <= 300 ? '正常' : '异常' },
+          { paramName: '转速', paramValue: speed, unit: 'r/min', standard: '1000-1500', status: parseInt(speed) >= 1000 && parseInt(speed) <= 1500 ? '正常' : '异常' },
+          { paramName: '传动效率', paramValue: (Math.random() * 5 + 92).toFixed(1), unit: '%', standard: '≥92', status: '正常' },
+          { paramName: '噪音', paramValue: (Math.random() * 10 + 65).toFixed(1), unit: 'dB', standard: '≤75', status: '正常' },
+          { paramName: '振动', paramValue: (Math.random() * 0.5).toFixed(2), unit: 'mm/s', standard: '≤0.5', status: '正常' },
+          { paramName: '温升', paramValue: (Math.random() * 20 + 30).toFixed(1), unit: '°C', standard: '≤50', status: '正常' }
+        ],
+        techInfo: {
+          device: '齿轮性能测试台GPT-500',
+          precision: '±0.5%',
+          range: '0-5000 N·m',
+          operator: operator,
+          startTime: this.generateRandomDate(),
+          endTime: this.generateRandomDate(),
+          location: '功能测试室306',
+          sample: product.name,
+          method: '负载试验',
+          standard: 'GB/T 3480-2017'
+        },
+        envInfo: {
+          temperature: Math.floor(Math.random() * 10) + 20,
+          humidity: Math.floor(Math.random() * 20) + 35,
+          pressure: (Math.random() * 5 + 98).toFixed(1),
+          illumination: '600 lux'
+        },
+        images: [
+          { src: require('@/assets/DigitalProduct Data/残余应力/加工图片/残余应力数据图像.png'), name: '功能测试图片1.png' },
+          { src: require('@/assets/DigitalProduct Data/残余应力/加工图片/背底片.png'), name: '功能测试图片2.png' }
+        ],
+        video: {
+          src: require('@/assets/DigitalProduct Data/残余应力/三维形貌测量过程视频.mp4'),
+          name: '功能测试视频'
+        }
+      }
+    },
+    
+    // 生成工艺数据
+    generateProcessData(product, nodeId, category) {
+      const operator = product.name === '齿轮测试' ? '姜钦露' : product.manager
+      
+      const processParams = this.generateProcessParams(nodeId)
+      
+      const processData = {
+        processParams: processParams,
+        techInfo: {
+          device: category.device,
+          method: category.method,
+          standard: category.standard,
+          operator: operator,
+          startTime: this.generateRandomDate(),
+          endTime: this.generateRandomDate(),
+          location: category.location,
+          sample: product.name,
+          processFlow: nodeId
+        },
+        envInfo: {
+          temperature: Math.floor(Math.random() * 10) + 20,
+          humidity: Math.floor(Math.random() * 20) + 35,
+          pressure: (Math.random() * 5 + 98).toFixed(1),
+          illumination: '600 lux'
+        },
+        images: this.generateProcessImages(nodeId),
+        video: this.generateProcessVideo(nodeId)
+      }
+      
+      this.hardnessData = processData
+      this.morphologyData = processData
+      this.stressData = processData
+    },
+    
+    // 生成工艺参数
+    generateProcessParams(nodeId) {
+      const paramTemplates = {
+        '车削': [
+          { paramName: '切削速度', paramValue: String(Math.floor(Math.random() * 50) + 100), unit: 'm/min', standard: '100-150', status: '正常' },
+          { paramName: '进给量', paramValue: (Math.random() * 0.2 + 0.1).toFixed(2), unit: 'mm/r', standard: '0.1-0.3', status: '正常' },
+          { paramName: '切削深度', paramValue: String(Math.floor(Math.random() * 3) + 2), unit: 'mm', standard: '2-5', status: '正常' },
+          { paramName: '主轴转速', paramValue: String(Math.floor(Math.random() * 500) + 1000), unit: 'r/min', standard: '1000-1500', status: '正常' }
+        ],
+        '铣削': [
+          { paramName: '铣削速度', paramValue: String(Math.floor(Math.random() * 80) + 120), unit: 'm/min', standard: '120-200', status: '正常' },
+          { paramName: '每齿进给量', paramValue: (Math.random() * 0.1 + 0.05).toFixed(3), unit: 'mm/z', standard: '0.05-0.15', status: '正常' },
+          { paramName: '铣削深度', paramValue: String(Math.floor(Math.random() * 5) + 3), unit: 'mm', standard: '3-8', status: '正常' },
+          { paramName: '主轴转速', paramValue: String(Math.floor(Math.random() * 800) + 2000), unit: 'r/min', standard: '2000-2800', status: '正常' }
+        ],
+        '淬火': [
+          { paramName: '淬火温度', paramValue: String(Math.floor(Math.random() * 100) + 800), unit: '°C', standard: '800-900', status: '正常' },
+          { paramName: '保温时间', paramValue: String(Math.floor(Math.random() * 30) + 30), unit: 'min', standard: '30-60', status: '正常' },
+          { paramName: '冷却介质', paramValue: '油', unit: '', standard: '油/水', status: '正常' },
+          { paramName: '冷却时间', paramValue: String(Math.floor(Math.random() * 10) + 5), unit: 'min', standard: '5-15', status: '正常' }
+        ],
+        '喷砂': [
+          { paramName: '喷砂压力', paramValue: String(Math.floor(Math.random() * 2) + 4), unit: 'MPa', standard: '4-6', status: '正常' },
+          { paramName: '喷砂距离', paramValue: String(Math.floor(Math.random() * 100) + 150), unit: 'mm', standard: '150-250', status: '正常' },
+          { paramName: '喷砂角度', paramValue: String(Math.floor(Math.random() * 30) + 60), unit: '°', standard: '60-90', status: '正常' },
+          { paramName: '喷砂时间', paramValue: String(Math.floor(Math.random() * 5) + 5), unit: 'min', standard: '5-10', status: '正常' }
+        ]
+      }
+      
+      const defaultParams = [
+        { paramName: '加工参数1', paramValue: String(Math.floor(Math.random() * 100)), unit: '单位', standard: '标准值', status: '正常' },
+        { paramName: '加工参数2', paramValue: String(Math.floor(Math.random() * 100)), unit: '单位', standard: '标准值', status: '正常' },
+        { paramName: '加工参数3', paramValue: String(Math.floor(Math.random() * 100)), unit: '单位', standard: '标准值', status: '正常' },
+        { paramName: '加工参数4', paramValue: String(Math.floor(Math.random() * 100)), unit: '单位', standard: '标准值', status: '正常' }
+      ]
+      
+      return paramTemplates[nodeId] || defaultParams
+    },
+    
+    // 生成工艺图片
+    generateProcessImages(nodeId) {
+      const imageTemplates = {
+        '车削': [
+          { src: require('@/assets/DigitalProduct Data/硬度计/加工图片/仪表盘图片.png'), name: '车削加工图片1.png' },
+          { src: require('@/assets/DigitalProduct Data/硬度计/加工图片/左节圆图片.png'), name: '车削加工图片2.png' }
+        ],
+        '铣削': [
+          { src: require('@/assets/DigitalProduct Data/硬度计/加工图片/测试前式样图片.png'), name: '铣削加工图片1.png' },
+          { src: require('@/assets/DigitalProduct Data/硬度计/加工图片/测试前式样表面图片.png'), name: '铣削加工图片2.png' }
+        ],
+        '淬火': [
+          { src: require('@/assets/DigitalProduct Data/三维型貌仪/加工图片/拼接尺寸.png'), name: '淬火处理图片1.png' },
+          { src: require('@/assets/DigitalProduct Data/三维型貌仪/加工图片/测试后云图.png'), name: '淬火处理图片2.png' }
+        ],
+        '喷砂': [
+          { src: require('@/assets/DigitalProduct Data/残余应力/加工图片/残余应力数据图像.png'), name: '喷砂处理图片1.png' },
+          { src: require('@/assets/DigitalProduct Data/残余应力/加工图片/背底片.png'), name: '喷砂处理图片2.png' }
+        ]
+      }
+      
+      const defaultImages = [
+        { src: require('@/assets/DigitalProduct Data/硬度计/加工图片/仪表盘图片.png'), name: '工艺图片1.png' },
+        { src: require('@/assets/DigitalProduct Data/硬度计/加工图片/左节圆图片.png'), name: '工艺图片2.png' }
+      ]
+      
+      return imageTemplates[nodeId] || defaultImages
+    },
+    
+    // 生成工艺视频
+    generateProcessVideo(nodeId) {
+      const videoTemplates = {
+        '车削': {
+          src: require('@/assets/DigitalProduct Data/硬度计/加工过程视频.mp4'),
+          name: '车削加工过程视频'
+        },
+        '铣削': {
+          src: require('@/assets/DigitalProduct Data/三维型貌仪/三维形貌测量过程视频.mp4'),
+          name: '铣削加工过程视频'
+        },
+        '淬火': {
+          src: require('@/assets/DigitalProduct Data/残余应力/三维形貌测量过程视频.mp4'),
+          name: '淬火处理过程视频'
+        },
+        '喷砂': {
+          src: require('@/assets/DigitalProduct Data/硬度计/加工过程视频.mp4'),
+          name: '喷砂处理过程视频'
+        }
+      }
+      
+      const defaultVideo = {
+        src: require('@/assets/DigitalProduct Data/硬度计/加工过程视频.mp4'),
+        name: '工艺过程视频'
+      }
+      
+      return videoTemplates[nodeId] || defaultVideo
+    },
+    
+    // 生成随机日期
+    generateRandomDate() {
+      const year = 2025
+      const month = Math.floor(Math.random() * 12) + 1
+      const day = Math.floor(Math.random() * 28) + 1
+      const hour = Math.floor(Math.random() * 24)
+      const minute = Math.floor(Math.random() * 60)
+      const second = Math.floor(Math.random() * 60)
+      
+      return `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')} ${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}:${String(second).padStart(2, '0')}`
     },
     
     // 导出数字产品
@@ -1109,6 +1822,7 @@ export default {
     // 切换流程节点
     switchNode(nodeId) {
       this.currentNode = nodeId
+      this.generateNodeData(nodeId)
       this.$message({
         message: '已切换到' + this.getNodeTitle(nodeId) + '节点',
         type: 'success'
@@ -1133,10 +1847,19 @@ export default {
         colorLight: '#ffffff',
         correctLevel: QRCode.CorrectLevel.H
       })
+    },
+    
+    // 获取当前节点状态
+    getCurrentNodeStatus() {
+      const currentNode = this.processNodes.find(node => node.id === this.currentNode)
+      return currentNode ? currentNode.status : '未开始'
     }
   },
   
   mounted() {
+    if (this.productList.length > 0) {
+      this.selectedProductId = this.productList[0].id
+    }
     // 生成二维码
     this.generateQrCode()
     // 这里可以添加3D齿轮模型的初始化代码
@@ -1163,14 +1886,16 @@ export default {
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-.search-container {
+.product-selector {
   display: flex;
-  gap: 15px;
   align-items: center;
 }
 
-.search-input {
-  width: 250px;
+.selector-label {
+  font-size: 14px;
+  color: #606266;
+  margin-right: 10px;
+  font-weight: 500;
 }
 
 /* 产品信息展示区域 */
@@ -1458,6 +2183,30 @@ export default {
   color: #333;
 }
 
+/* 暂无数据容器 */
+.no-data-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  background-color: #f5f7fa;
+  border-radius: 8px;
+  border: 2px dashed #dcdfe6;
+}
+
+.no-data-icon {
+  font-size: 60px;
+  color: #909399;
+  margin-bottom: 20px;
+}
+
+.no-data-text {
+  font-size: 18px;
+  color: #909399;
+  font-weight: 500;
+}
+
 /* 媒体容器 */
 .media-container {
   display: flex;
@@ -1500,7 +2249,7 @@ export default {
     gap: 15px;
   }
   
-  .search-container {
+  .product-selector {
     flex-wrap: wrap;
     justify-content: center;
   }
@@ -1538,10 +2287,6 @@ export default {
 }
 
 @media (max-width: 480px) {
-  .search-input {
-    width: 100%;
-  }
-  
   .test-image {
     width: 100%;
   }

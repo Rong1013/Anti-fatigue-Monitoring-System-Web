@@ -46,7 +46,7 @@ export const constantRoutes = [
   {
     path: '/',
     component: Layout,
-    redirect: '/home',
+    redirect: '/login',
     children: [{
       path: 'home',
       name: 'Home',
@@ -69,6 +69,19 @@ export const constantRoutes = [
   },
 
   {
+    path: '/device',
+    component: Layout,
+    children: [
+      {
+        path: 'index',
+        name: 'DeviceManagement',
+        component: () => import('@/views/device/index'),
+        meta: { title: '设备管理', icon: 'el-icon-monitor' }
+      }
+    ]
+  },
+
+  {
     path: '/product',
     component: Layout,
     children: [
@@ -82,14 +95,14 @@ export const constantRoutes = [
   },
 
   {
-    path: '/device',
+    path: '/digital-product',
     component: Layout,
     children: [
       {
         path: 'index',
-        name: 'DeviceManagement',
-        component: () => import('@/views/device/index'),
-        meta: { title: '设备管理', icon: 'el-icon-monitor' }
+        name: 'DigitalProduct',
+        component: () => import('@/views/digital-product/index'),
+        meta: { title: '数字产品', icon: 'el-icon-s-cooperation' }
       }
     ]
   },
@@ -142,19 +155,6 @@ export const constantRoutes = [
         name: 'DataVisualization',
         component: () => import('@/views/visualization/index'),
         meta: { title: '数据可视化', icon: 'el-icon-pie-chart' }
-      }
-    ]
-  },
-
-  {
-    path: '/digital-product',
-    component: Layout,
-    children: [
-      {
-        path: 'index',
-        name: 'DigitalProduct',
-        component: () => import('@/views/digital-product/index'),
-        meta: { title: '数字产品', icon: 'el-icon-s-cooperation' }
       }
     ]
   },
